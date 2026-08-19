@@ -6,4 +6,4 @@ python-dotenv
 structlog
 pytest
 pytest-asyncio
-httpx
+httpx2
