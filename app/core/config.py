@@ -60,6 +60,14 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    document_storage_path: str = Field(
+        default="data/uploads",
+        validation_alias=AliasChoices(
+            "DOCUMENT_STORAGE_PATH",
+            "ASTA_DOCUMENT_STORAGE_PATH",
+        ),
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
