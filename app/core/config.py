@@ -38,7 +38,13 @@ class Settings(BaseSettings):
             "ASTA_DATABASE_URL",
         ),
     )
-
+    test_database_url: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "TEST_DATABASE_URL",
+            "ASTA_TEST_DATABASE_URL",
+        ),
+    )
     embedding_model: str = Field(
         default="BAAI/bge-small-en-v1.5",
         validation_alias=AliasChoices(
