@@ -1,0 +1,11 @@
+Login Page
+
+Users enter their username and password to access WebPortal.
+
+Project List
+
+The Project List displays the user's available projects.
+
+Create New Project
+
+The Create New Project page is used to begin entering project information.
