@@ -52,6 +52,22 @@ class Settings(BaseSettings):
             "ASTA_EMBEDDING_MODEL",
         ),
     )
+    embedding_device: str = Field(
+        default="cpu",
+        validation_alias=AliasChoices(
+            "EMBEDDING_DEVICE",
+            "ASTA_EMBEDDING_DEVICE",
+        ),
+    )
+    
+    embedding_batch_size: int = Field(
+        default=32,
+        validation_alias=AliasChoices(
+            "EMBEDDING_BATCH_SIZE",
+            "ASTA_EMBEDDING_BATCH_SIZE",
+        ),
+        ge=1,
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
