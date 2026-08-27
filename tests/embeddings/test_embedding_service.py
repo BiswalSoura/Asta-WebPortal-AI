@@ -16,7 +16,7 @@ class FakeEncoder:
     ) -> None:
         self.dimensions = dimensions
 
-    def get_sentence_embedding_dimension(
+    def get_embedding_dimension(
         self,
     ) -> int:
         return self.dimensions

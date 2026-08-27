@@ -68,6 +68,49 @@ class Settings(BaseSettings):
         ),
         ge=1,
     )
+    reranker_model: str = Field(
+        default="cross-encoder/ms-marco-MiniLM-L-6-v2",
+        validation_alias=AliasChoices(
+            "RERANKER_MODEL",
+            "ASTA_RERANKER_MODEL",
+        ),
+    )
+
+    reranker_device: str = Field(
+        default="cpu",
+        validation_alias=AliasChoices(
+            "RERANKER_DEVICE",
+            "ASTA_RERANKER_DEVICE",
+        ),
+    )
+
+    reranker_min_score: float = Field(
+        default=0.5,
+        validation_alias=AliasChoices(
+            "RERANKER_MIN_SCORE",
+            "ASTA_RERANKER_MIN_SCORE",
+        ),
+        ge=0.0,
+        le=1.0,
+    )
+
+    retrieval_top_k: int = Field(
+        default=8,
+        validation_alias=AliasChoices(
+            "RETRIEVAL_TOP_K",
+            "ASTA_RETRIEVAL_TOP_K",
+        ),
+        ge=1,
+    )
+
+    retrieval_final_k: int = Field(
+        default=4,
+        validation_alias=AliasChoices(
+            "RETRIEVAL_FINAL_K",
+            "ASTA_RETRIEVAL_FINAL_K",
+        ),
+        ge=1,
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -7,9 +7,13 @@ from app.services.embedding_indexing import (
 from app.services.knowledge_ingestion import (
     KnowledgeIngestionService,
 )
+from app.services.knowledge_retrieval import (
+    KnowledgeRetrievalService,
+)
 
 __all__ = [
     "EmbeddingIndexingService",
     "KnowledgeIngestionService",
+    "KnowledgeRetrievalService",
     "LocalDocumentStorage",
 ]

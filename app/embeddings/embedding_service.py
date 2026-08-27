@@ -10,7 +10,7 @@ from app.embeddings.exceptions import (
 
 
 class EmbeddingEncoder(Protocol):
-    def get_sentence_embedding_dimension(
+    def get_embedding_dimension(
         self,
     ) -> int | None:
         ...
@@ -123,7 +123,7 @@ class EmbeddingService:
     ) -> None:
         dimensions = (
             encoder
-            .get_sentence_embedding_dimension()
+            .get_embedding_dimension()
         )
 
         if (
