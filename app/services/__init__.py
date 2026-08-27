@@ -1,3 +1,6 @@
+from app.services.asta_service import (
+    AstaService,
+)
 from app.services.document_storage import (
     LocalDocumentStorage,
 )
@@ -12,6 +15,7 @@ from app.services.knowledge_retrieval import (
 )
 
 __all__ = [
+    "AstaService",
     "EmbeddingIndexingService",
     "KnowledgeIngestionService",
     "KnowledgeRetrievalService",
