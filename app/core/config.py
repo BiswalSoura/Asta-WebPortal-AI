@@ -31,6 +31,43 @@ class Settings(BaseSettings):
         ),
     )
 
+    llm_temperature: float = Field(
+        default=0.2,
+        validation_alias=AliasChoices(
+            "LLM_TEMPERATURE",
+            "ASTA_LLM_TEMPERATURE",
+        ),
+        ge=0.0,
+        le=2.0,
+    )
+
+    llm_max_tokens: int = Field(
+        default=600,
+        validation_alias=AliasChoices(
+            "LLM_MAX_TOKENS",
+            "ASTA_LLM_MAX_TOKENS",
+        ),
+        ge=1,
+    )
+
+    llm_timeout_seconds: float = Field(
+        default=30.0,
+        validation_alias=AliasChoices(
+            "LLM_TIMEOUT_SECONDS",
+            "ASTA_LLM_TIMEOUT_SECONDS",
+        ),
+        gt=0,
+    )
+
+    llm_max_retries: int = Field(
+        default=2,
+        validation_alias=AliasChoices(
+            "LLM_MAX_RETRIES",
+            "ASTA_LLM_MAX_RETRIES",
+        ),
+        ge=0,
+    )
+
     database_url: str | None = Field(
         default=None,
         validation_alias=AliasChoices(
