@@ -13,6 +13,9 @@ from app.services.knowledge_ingestion import (
 from app.services.knowledge_retrieval import (
     KnowledgeRetrievalService,
 )
+from app.services.conversation_service import (
+    ConversationService,
+)
 
 __all__ = [
     "AstaService",
@@ -20,4 +23,5 @@ __all__ = [
     "KnowledgeIngestionService",
     "KnowledgeRetrievalService",
     "LocalDocumentStorage",
+    "ConversationService",
 ]

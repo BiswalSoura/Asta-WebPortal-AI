@@ -7,9 +7,13 @@ from app.database.repositories.embedding_repository import (
 from app.database.repositories.knowledge_repository import (
     KnowledgeRepository,
 )
+from app.database.repositories.conversation_repository import (
+    ConversationRepository,
+)
 
 __all__ = [
     "BaseRepository",
     "EmbeddingRepository",
     "KnowledgeRepository",
+    "ConversationRepository",
 ]

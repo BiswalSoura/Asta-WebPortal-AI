@@ -164,6 +164,26 @@ class Settings(BaseSettings):
         ),
     )
 
+    conversation_history_messages: int = Field(
+        default=6,
+        validation_alias=AliasChoices(
+            "CONVERSATION_HISTORY_MESSAGES",
+            "ASTA_CONVERSATION_HISTORY_MESSAGES",
+        ),
+        ge=1,
+        le=20,
+    )
+
+    conversation_context_max_chars: int = Field(
+        default=4000,
+        validation_alias=AliasChoices(
+            "CONVERSATION_CONTEXT_MAX_CHARS",
+            "ASTA_CONVERSATION_CONTEXT_MAX_CHARS",
+        ),
+        ge=500,
+        le=20000,
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
