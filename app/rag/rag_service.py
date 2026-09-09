@@ -1,3 +1,9 @@
+from typing import Protocol
+
+from app.retrieval.models import (
+    RetrievalCandidate,
+)
+
 from app.llm import LLMClient
 from app.prompts import ASTA_SYSTEM_PROMPT
 from app.rag.context_builder import (
@@ -10,13 +16,17 @@ from app.rag.models import (
 from app.rag.prompt_builder import (
     RAGPromptBuilder,
 )
-from app.services.knowledge_retrieval import (
-    KnowledgeRetrievalService,
-)
 
 from app.rag.grounding_sanitizer import (
     GroundingSanitizer,
 )
+
+class RetrievalService(Protocol):
+    async def search(
+        self,
+        query: str,
+    ) -> list[RetrievalCandidate]:
+        ...
 
 INSUFFICIENT_KNOWLEDGE_RESPONSE = (
     "I don't currently have enough approved "
@@ -30,7 +40,7 @@ class RAGService:
         self,
         *,
         retrieval_service: (
-            KnowledgeRetrievalService
+            RetrievalService
         ),
         llm_client: LLMClient,
         context_builder: (
