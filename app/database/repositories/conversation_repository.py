@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select
@@ -76,6 +77,7 @@ class ConversationRepository:
             message_metadata=(
                 message_metadata
             ),
+            created_at=datetime.now(timezone.utc),
         )
 
         self.session.add(message)
