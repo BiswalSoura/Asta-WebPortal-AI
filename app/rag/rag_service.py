@@ -1,5 +1,6 @@
 from typing import Protocol
 
+from app.core.telemetry import observe
 from app.retrieval.models import (
     RetrievalCandidate,
 )
@@ -78,10 +79,11 @@ class RAGService:
         self,
         question: str,
     ) -> RAGAnswer:
-        candidates = (
-            await self.retrieval_service
-            .search(question)
-        )
+        with observe("retrieval"):
+            candidates = (
+                await self.retrieval_service
+                .search(question)
+            )
 
         if not candidates:
             return RAGAnswer(
@@ -108,14 +110,15 @@ class RAGService:
             )
         )
 
-        response = (
-            await self.llm_client.generate(
-                system_prompt=(
-                    ASTA_SYSTEM_PROMPT
-                ),
-                user_prompt=user_prompt,
+        with observe("llm"):
+            response = (
+                await self.llm_client.generate(
+                    system_prompt=(
+                        ASTA_SYSTEM_PROMPT
+                    ),
+                    user_prompt=user_prompt,
+                )
             )
-        )
 
         sanitized_answer = (
             self.grounding_sanitizer

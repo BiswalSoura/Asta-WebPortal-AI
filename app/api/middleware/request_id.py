@@ -1,42 +1,56 @@
-from uuid import uuid4
-
+"""HTTP correlation including CORS short circuits and handled errors."""
+from time import perf_counter
 import structlog
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.datastructures import Headers, MutableHeaders
 from starlette.requests import Request
-from starlette.responses import Response
-
-from app.core.constants import REQUEST_ID_HEADER
+from app.core.telemetry import classify_error, emit, normalize_request_id
 
 
-logger = structlog.get_logger(__name__)
+class RequestIDMiddleware:
+    def __init__(self, app):
+        self.app = app
 
+    async def __call__(self, scope, receive, send):
+        if scope['type'] != 'http':
+            return await self.app(scope, receive, send)
+        values = Headers(scope=scope).getlist('x-request-id')
+        request_id = normalize_request_id(values[0] if len(values) == 1 else None)
+        state = scope.setdefault('state', {})
+        state['request_id'] = request_id
+        tokens = structlog.contextvars.bind_contextvars(request_id=request_id)
+        started = perf_counter()
+        status = 500
+        response_started = False
 
-class RequestIDMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self,
-        request: Request,
-        call_next,
-    ) -> Response:
-        request_id = request.headers.get(
-            REQUEST_ID_HEADER,
-            str(uuid4()),
-        )
+        def fields():
+            return dict(request_id=request_id, method=scope['method'],
+                        route=getattr(scope.get('route'), 'path', 'unmatched'),
+                        status_code=status, elapsed_ms=round((perf_counter()-started)*1000, 3))
 
-        request.state.request_id = request_id
+        async def correlated_send(message):
+            nonlocal status, response_started
+            if message['type'] == 'http.response.start':
+                status = message['status']
+                response_started = True
+                MutableHeaders(scope=message)['X-Request-ID'] = request_id
+            await send(message)
 
-        structlog.contextvars.clear_contextvars()
-        structlog.contextvars.bind_contextvars(
-            request_id=request_id,
-            method=request.method,
-            path=request.url.path,
-        )
-
+        emit('request_started', request_id=request_id, method=scope['method'])
         try:
-            response = await call_next(request)
-
-            response.headers[REQUEST_ID_HEADER] = request_id
-
-            return response
-
+            try:
+                await self.app(scope, receive, correlated_send)
+            except Exception as exc:
+                state['operational_error_code'] = classify_error(exc)
+                if response_started:
+                    emit('request_failed', **fields(), error_code=classify_error(exc))
+                    raise
+                # Preserve the authoritative central error response; avoid a server traceback.
+                from app.api.exception_handlers import unhandled_exception_handler
+                response = await unhandled_exception_handler(Request(scope), exc)
+                await response(scope, receive, correlated_send)
+            code = state.get('operational_error_code') or classify_error(status_code=status)
+            if status >= 400:
+                emit('request_failed', **fields(), error_code=code)
+            emit('request_completed', **fields(), error_code=code)
         finally:
-            structlog.contextvars.clear_contextvars()
+            structlog.contextvars.reset_contextvars(**tokens)

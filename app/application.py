@@ -55,16 +55,14 @@ def create_application() -> FastAPI:
     )
 
     application.add_middleware(
-        RequestIDMiddleware,
-    )
-
-    application.add_middleware(
         CORSMiddleware,
         allow_origins=[],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    application.add_middleware(RequestIDMiddleware)
 
     application.add_exception_handler(
         AstaError,

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
+from app.core.telemetry import emit
 from app.conversation import (
     ConversationContextBuilder,
     ConversationHistoryMessage,
@@ -170,6 +171,10 @@ class ConversationService:
                 assistant_metadata
             ),
         )
+
+        emit("conversation_outcome", request_id=request_id,
+             contextualized=contextualized, grounded=answer.grounded,
+             model_used=answer.model is not None, source_count=len(answer.sources))
 
         return ConversationReply(
             conversation_id=conversation_id,
