@@ -2,6 +2,7 @@ from typing import Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.telemetry import emit, observe
 from app.guardrails import GuardrailService
 from app.llm import create_llm_client
 from app.rag import (
@@ -75,6 +76,8 @@ class AstaService:
         )
 
         if not decision.allowed:
+            emit("chat_outcome", path="guardrail_bypass", outcome="bypass",
+                 grounded=False, model_used=False, source_count=0)
             return RAGAnswer(
                 answer=(
                     decision.response
@@ -88,6 +91,10 @@ class AstaService:
                 grounded=False,
             )
 
-        return await self.rag_service.answer(
-            question
-        )
+        with observe("rag"):
+            result = await self.rag_service.answer(question)
+        emit("chat_outcome", path="rag",
+             outcome="grounded" if result.grounded else "insufficient_information",
+             grounded=result.grounded, model_used=result.model is not None,
+             source_count=len(result.sources))
+        return result

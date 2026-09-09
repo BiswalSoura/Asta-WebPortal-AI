@@ -1,11 +1,8 @@
-import structlog
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from app.core.exceptions import AstaError
-
-
-logger = structlog.get_logger(__name__)
+from app.core.telemetry import classify_error, emit
 
 
 async def asta_exception_handler(
@@ -18,11 +15,8 @@ async def asta_exception_handler(
         None,
     )
 
-    logger.warning(
-        "asta_application_error",
-        error_code=exc.error_code,
-        error_message=exc.message,
-    )
+    request.state.operational_error_code = classify_error(exc)
+    emit("application_error", request_id=request_id, error_code=classify_error(exc))
 
     return JSONResponse(
         status_code=400,
@@ -46,13 +40,12 @@ async def unhandled_exception_handler(
         None,
     )
 
-    logger.exception(
-        "unhandled_application_error",
-        exception_type=type(exc).__name__,
-    )
+    request.state.operational_error_code = classify_error(exc)
+    emit("application_error", request_id=request_id, error_code=classify_error(exc))
 
     return JSONResponse(
         status_code=500,
+        headers={"X-Request-ID": request_id} if request_id else {},
         content={
             "error": {
                 "code": "INTERNAL_SERVER_ERROR",

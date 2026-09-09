@@ -4,6 +4,7 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Request,
     status,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,6 +68,7 @@ async def create_conversation(
 async def send_message(
     conversation_id: UUID,
     request: ChatMessageRequest,
+    http_request: Request,
     session: AsyncSession = Depends(
         get_database_session
     ),
@@ -80,11 +82,13 @@ async def send_message(
                 conversation_id
             ),
             message=request.message,
+            request_id=http_request.state.request_id,
         )
 
         await session.commit()
 
     except ConversationNotFoundError:
+        http_request.state.operational_error_code = "conversation_not_found"
         await session.rollback()
 
         raise HTTPException(
