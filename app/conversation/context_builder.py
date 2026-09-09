@@ -130,8 +130,24 @@ class ConversationContextBuilder:
         if not self._is_follow_up(current):
             return current, False
 
+        # Greetings provide no knowledge topic and can dilute retrieval/reranking.
+        # Keep stored history intact; omit only greeting exchanges from this query.
+        relevant_history = []
+        greeting_turn = False
+        for message in history:
+            if message.role == "user":
+                greeting_turn = (
+                    self.intent_classifier.classify(message.content)
+                    == IntentType.GREETING
+                )
+            if not greeting_turn:
+                relevant_history.append(message)
+
+        if not relevant_history:
+            return current, False
+
         history_text = self._format_history(
-            history
+            relevant_history
         )
 
         contextual_query = (

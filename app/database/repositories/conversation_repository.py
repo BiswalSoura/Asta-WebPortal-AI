@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 from sqlalchemy import select
@@ -67,6 +67,23 @@ class ConversationRepository:
             dict | None
         ) = None,
     ) -> Message:
+        # Serialize timestamp allocation across writers to this conversation.
+        # Wall-clock values may repeat (or move backwards), especially on Windows.
+        await self.session.execute(
+            select(Conversation.id)
+            .where(Conversation.id == conversation_id)
+            .with_for_update()
+        )
+        latest = await self.session.scalar(
+            select(Message.created_at)
+            .where(Message.conversation_id == conversation_id)
+            .order_by(Message.created_at.desc())
+            .limit(1)
+        )
+        created_at = datetime.now(timezone.utc)
+        if latest is not None and created_at <= latest:
+            created_at = latest + timedelta(microseconds=1)
+
         message = Message(
             conversation_id=(
                 conversation_id
@@ -77,7 +94,7 @@ class ConversationRepository:
             message_metadata=(
                 message_metadata
             ),
-            created_at=datetime.now(timezone.utc),
+            created_at=created_at,
         )
 
         self.session.add(message)

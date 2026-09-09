@@ -1,0 +1,54 @@
+:host { font: 16px/1.5 "Segoe UI", system-ui, sans-serif; color: #1c3043; color-scheme: light; }
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; opacity: .55; }
+button:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid #eaa434; outline-offset: 3px; }
+.asta-launcher { position: fixed; right: 28px; bottom: 24px; z-index: 10000; display: flex; gap: 10px; align-items: center; padding: 15px 22px; border: 0; border-radius: 32px; background: #124e66; color: #fff; box-shadow: 0 6px 24px #173d6430; font-weight: 650; }
+.asta-panel { position: fixed; right: 28px; bottom: 96px; z-index: 10001; width: 410px; max-width: calc(100vw - 32px); height: 620px; max-height: calc(100dvh - 120px); display: flex; flex-direction: column; border: 1px solid #cddce5; border-radius: 20px; background: white; overflow: hidden; box-shadow: 0 18px 65px #19394b26; }
+.asta-header { display: flex; gap: 12px; align-items: center; padding: 18px; color: #fff; background: #124e66; }
+.asta-avatar { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #ffffff20; font-weight: 700; flex-shrink: 0; }
+.asta-heading { flex: 1; }
+.asta-heading h2 { font-size: 18px; margin: 0; }
+.asta-heading p { font-size: 14px; margin: 0; color: #dbecf3; }
+.asta-close { border: 0; background: transparent; color: white; font-size: 28px; min-width: 44px; min-height: 44px; }
+.asta-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 18px; border-bottom: 1px solid #e6edf1; font-size: 14px; color: #526777; }
+.asta-new { border: 0; background: transparent; padding: 10px 0 10px 12px; color: #14546e; font-weight: 600; }
+.asta-messages { flex: 1; min-height: 65px; overflow-y: auto; overscroll-behavior: contain; padding: 18px; background: #f7fafc; }
+.asta-message { padding: 12px 14px; border-radius: 14px; margin-bottom: 14px; max-width: 94%; overflow-wrap: anywhere; }
+.asta-message strong { font-size: 14px; }
+.asta-message p { white-space: pre-wrap; margin: 6px 0 0; }
+.asta-assistant { background: white; border: 1px solid #e0e8ef; }
+.asta-user { background: #e0eef5; margin-left: auto; }
+.asta-message details { margin-top: 12px; font-size: 14px; }
+.asta-message summary { cursor: pointer; color: #14546e; }
+.asta-message ul { padding-left: 20px; }
+.asta-message small { display: block; margin-top: 8px; color: #8b3c26; font-size: 14px; }
+.asta-status, .asta-error { margin: 0; padding: 0 18px; font-size: 14px; }
+.asta-status:not(:empty) { padding-top: 10px; padding-bottom: 10px; color: #526777; }
+.asta-error { color: #893a23; background: #fff1e9; padding: 10px 18px; max-height: 110px; overflow: auto; }
+.asta-form { padding: 12px 18px 16px; border-top: 1px solid #e6edf1; }
+.asta-form label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.asta-form textarea { display: block; width: 100%; resize: none; padding: 10px; border: 1px solid #b7cbd8; border-radius: 10px; color: #1c3043; background: #fff; }
+.asta-compose-bottom { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.asta-compose-bottom span { flex: 1; font-size: 12px; color: #526777; }
+.asta-send { padding: 10px 15px; border: 0; border-radius: 9px; background: #124e66; color: #fff; font-weight: 600; }
+.asta-demo { margin: 0; font: 16px/1.6 "Segoe UI", system-ui, sans-serif; color: #1c3043; background: #f3f7fa; }
+.asta-demo-header { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 22px 6vw; border-bottom: 1px solid #dbe5ec; background: white; }
+.asta-demo-header span { color: #526777; font-size: 14px; }
+.asta-demo-main { max-width: 760px; padding: 9vh 6vw 120px; }
+.asta-demo-eyebrow { color: #14546e; font-size: 14px; font-weight: 650; letter-spacing: .12em; }
+.asta-demo-main h1 { margin: 12px 0; font-size: clamp(36px, 5vw, 58px); line-height: 1.15; letter-spacing: -.04em; }
+.asta-demo-card { margin-top: 32px; padding: 18px 24px; border-left: 3px solid #287d99; background: white; border-radius: 0 12px 12px 0; }
+.asta-demo-card h2 { font-size: 16px; }
+.asta-demo-note { color: #526777; font-size: 14px; margin-top: 24px; }
+@media (max-width: 480px) {
+  .asta-launcher { right: 16px; bottom: 16px; }
+  .asta-panel { right: 8px; bottom: 88px; width: calc(100vw - 16px); max-width: none; max-height: calc(100dvh - 100px); border-radius: 15px; }
+}
+@media (max-height: 540px) {
+  .asta-panel { bottom: 8px; max-height: calc(100dvh - 16px); }
+  .asta-header { padding: 8px 14px; }
+  .asta-form { padding: 8px 14px; }
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asta · Local chat prototype</title>
+  <link rel="stylesheet" href="./css/asta-widget.css">
+  <script type="module" src="./js/asta-widget.js"></script>
+</head>
+<body class="asta-demo">
+  <header class="asta-demo-header"><strong>A&amp;A Engineering</strong><span>Local prototype · M11</span></header>
+  <main class="asta-demo-main">
+    <p class="asta-demo-eyebrow">WEBPORTAL ASSISTANT</p>
+    <h1>Meet Asta.</h1>
+    <p>Ask about WebPortal features using the chat button below.</p>
+    <section class="asta-demo-card" aria-labelledby="try-heading">
+      <h2 id="try-heading">Try a conversation</h2>
+      <p>“Where can I enter parcel information for the project location?”</p>
+      <p>Then ask: “Can you explain that option?”</p>
+    </section>
+    <p class="asta-demo-note">This standalone page connects to your local Asta service. A page refresh starts a fresh chat; closing the panel keeps the current conversation.</p>
+  </main>
+  <div id="asta-widget" data-api-base="/api/v1/chat"></div>
+</body>
+</html>
