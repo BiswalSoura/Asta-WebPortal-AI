@@ -230,3 +230,6 @@ data/uploads/*
 
 # Local generated vector/model caches
 .cache/
+
+# M12 generated evaluation reports (golden cases remain versioned)
+data/evaluation/results/
