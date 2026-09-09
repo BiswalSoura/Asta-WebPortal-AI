@@ -14,6 +14,9 @@ from app.services.knowledge_retrieval import (
     KnowledgeRetrievalService,
 )
 
+from app.rag.grounding_sanitizer import (
+    GroundingSanitizer,
+)
 
 INSUFFICIENT_KNOWLEDGE_RESPONSE = (
     "I don't currently have enough approved "
@@ -36,6 +39,9 @@ class RAGService:
         prompt_builder: (
             RAGPromptBuilder | None
         ) = None,
+        grounding_sanitizer: (
+            GroundingSanitizer | None
+        ) = None,
     ) -> None:
         self.retrieval_service = (
             retrieval_service
@@ -51,6 +57,11 @@ class RAGService:
         self.prompt_builder = (
             prompt_builder
             or RAGPromptBuilder()
+        )
+
+        self.grounding_sanitizer = (
+            grounding_sanitizer
+            or GroundingSanitizer()
         )
 
     async def answer(
@@ -96,6 +107,14 @@ class RAGService:
             )
         )
 
+        sanitized_answer = (
+            self.grounding_sanitizer
+            .sanitize(
+                answer=response.content,
+                context=context,
+            )
+        )
+
         sources = tuple(
             RAGSource(
                 document_name=(
@@ -122,7 +141,7 @@ class RAGService:
         )
 
         return RAGAnswer(
-            answer=response.content,
+            answer=sanitized_answer,
             sources=sources,
             model=response.model,
             prompt_tokens=(
