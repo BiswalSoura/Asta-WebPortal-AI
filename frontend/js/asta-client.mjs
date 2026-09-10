@@ -7,7 +7,7 @@ export class ChatError extends Error {
   }
 }
 
-const isId = (value) => typeof value === 'string' &&
+export const isId = (value) => typeof value === 'string' && value.length === 36 &&
   /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value);
 
 export function validateMessage(value) {
@@ -23,18 +23,50 @@ export function validateMessage(value) {
 
 export class AstaClient {
   constructor({ baseUrl = '/api/v1/chat', fetchImpl = globalThis.fetch.bind(globalThis),
-    timeoutMs = 180000 } = {}) {
-    this.baseUrl = baseUrl.replace(/\/$/, '');
+    timeoutMs = 180000, storage = null, storageKey = SESSION_KEY, pageContext = null } = {}) {
+    this.baseUrl = normalizeApiBase(baseUrl);
+    this.storage = storage;
+    this.storageKey = storageKey;
+    this.pageContext = validatePageContext(pageContext);
+    this.generation = 0;
     this.fetchImpl = fetchImpl;
     this.timeoutMs = timeoutMs;
-    this.conversationId = null;
+    this.conversationId = this.restore();
     this.busy = false;
     this.resetRequired = false;
+  }
+
+  restore() {
+    try {
+      const id = this.storage?.getItem(this.storageKey);
+      if (isId(id)) return id;
+      this.storage?.removeItem(this.storageKey);
+    } catch {}
+    return null;
+  }
+
+  persist(id) {
+    try {
+      if (id) this.storage?.setItem(this.storageKey, id);
+      else this.storage?.removeItem(this.storageKey);
+    } catch {}
+  }
+
+  setPageContext(value) { this.pageContext = validatePageContext(value); }
+
+  resetSession() {
+    this.generation += 1;
+    this.conversationId = null;
+    this.persist(null);
+    this.resetRequired = false;
+    this.busy = false;
+    this.pageContext = null;
   }
 
   reset() {
     if (this.busy) throw new ChatError('Wait for the current reply before starting a new chat.');
     this.conversationId = null;
+    this.persist(null);
     this.resetRequired = false;
   }
 
@@ -74,15 +106,20 @@ export class AstaClient {
     if (this.busy) throw new ChatError('A reply is already on its way.');
     if (this.resetRequired) throw new ChatError('Start a new chat before sending again.', { resetRequired: true });
     this.busy = true;
+    const generation = this.generation;
+    const current = () => { if (generation !== this.generation) throw new ChatError("Session reset."); };
     let messageStarted = false;
     try {
       if (!this.conversationId) {
-        const created = await this.post('/conversations');
+        const created = await this.post('/conversations', this.pageContext === null ? undefined : { page_context: this.pageContext });
+        current();
         if (!isId(created?.conversation_id)) throw new ChatError('Asta returned an invalid conversation.');
         this.conversationId = created.conversation_id;
+        this.persist(this.conversationId);
       }
       messageStarted = true;
       const reply = await this.post(`/conversations/${this.conversationId}/messages`, { message });
+      current();
       if (reply?.conversation_id !== this.conversationId || typeof reply.answer !== 'string' ||
           !Array.isArray(reply.sources) || !reply.sources.every((source) => source &&
             (source.section_title == null || typeof source.section_title === 'string') &&
@@ -91,14 +128,40 @@ export class AstaClient {
       }
       return reply;
     } catch (error) {
+      if (generation !== this.generation) throw new ChatError("Session reset.");
+      if (error.status === 404) { this.conversationId = null; this.persist(null); }
       // POST has no idempotency key: never silently replay an uncertain message.
       if (messageStarted && ![422, 429].includes(error.status)) {
+        this.persist(null);
         this.resetRequired = true;
         error.resetRequired = true;
       }
       throw error;
     } finally {
-      this.busy = false;
+      if (generation === this.generation) this.busy = false;
     }
   }
+}
+
+export const SESSION_KEY = 'aa.asta.m14.conversation-id';
+
+export function validatePageContext(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(value)) {
+    throw new ChatError('Page context must be a non-sensitive identifier of 1–128 characters.');
+  }
+  return value;
+}
+
+export function normalizeApiBase(value) {
+  if (typeof value !== 'string' || !value || /[\\\s?#%]/.test(value) || value.startsWith('//')) {
+    throw new ChatError('Invalid API base URL.');
+  }
+  const relative = value.startsWith('/');
+  let url;
+  try { url = new URL(value, 'https://asta.invalid'); } catch { throw new ChatError('Invalid API base URL.'); }
+  if ((!relative && !/^https?:\/\//.test(value)) || !['http:', 'https:'].includes(url.protocol) || url.username || url.password || /(?:^|\/)\.\.?(?:\/|$)/.test(value)) {
+    throw new ChatError('Invalid API base URL.');
+  }
+  return (relative ? url.pathname : url.origin + url.pathname).replace(/\/+$/, '');
 }

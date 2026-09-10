@@ -23,10 +23,13 @@ def create_local_application() -> FastAPI:
     async def local_page() -> FileResponse:
         return FileResponse(FRONTEND / "index.html", headers={"Cache-Control": "no-store"})
 
-    @application.get("/m11/js/asta-client.mjs", include_in_schema=False)
-    async def client_module() -> FileResponse:
+    @application.get("/m11/js/{module}.mjs", include_in_schema=False)
+    async def client_module(module: str) -> FileResponse:
+        from fastapi import HTTPException
+        if module not in {"asta-client", "asta-widget-core", "asta-embed", "host-demo"}:
+            raise HTTPException(status_code=404)
         # Windows MIME registry entries can label .mjs as text/plain.
-        return FileResponse(FRONTEND / "js" / "asta-client.mjs", media_type="application/javascript")
+        return FileResponse(FRONTEND / "js" / f"{module}.mjs", media_type="application/javascript")
 
     # Expose only the two public asset folders, never the repository or its .env.
     application.mount("/m11/css", StaticFiles(directory=FRONTEND / "css"), name="m11-css")

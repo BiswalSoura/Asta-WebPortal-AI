@@ -1,6 +1,7 @@
 from functools import lru_cache
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, field_validator
+from urllib.parse import urlsplit
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.core.constants import (
@@ -10,6 +11,22 @@ from app.core.constants import (
 
 
 class Settings(BaseSettings):
+    cors_allowed_origins: list[str] = Field(default_factory=list)
+    cors_expose_request_id: bool = False
+
+    @field_validator("cors_allowed_origins")
+    @classmethod
+    def validate_origins(cls, origins: list[str]) -> list[str]:
+        for origin in origins:
+            parsed = urlsplit(origin)
+            if (parsed.scheme not in {"http", "https"} or not parsed.hostname
+                or parsed.username or parsed.password or parsed.path
+                or parsed.query or parsed.fragment or "*" in origin
+                or "\\" in origin or any(c.isspace() for c in origin)):
+                raise ValueError("CORS requires exact HTTP(S) origins without paths")
+            _ = parsed.port
+        return origins
+
     app_name: str = "Asta"
     environment: str = "development"
     api_v1_prefix: str = DEFAULT_API_V1_PREFIX
