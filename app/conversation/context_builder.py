@@ -1,4 +1,5 @@
 import re
+from app.intent.query_understanding import DOMAIN, FOLLOW_UP, normalize_language
 
 from app.guardrails import (
     PromptInjectionDetector,
@@ -119,12 +120,17 @@ class ConversationContextBuilder:
         ):
             return current, False
 
+        current = normalize_language(current).query
+
         intent = (
             self.intent_classifier
             .classify(current)
         )
 
         if intent != IntentType.UNKNOWN:
+            return current, False
+
+        if DOMAIN.search(current):
             return current, False
 
         if not self._is_follow_up(current):
@@ -146,6 +152,33 @@ class ConversationContextBuilder:
         if not relevant_history:
             return current, False
 
+        # Only a recent explicit domain topic supplies a referent. Discard earlier topics.
+        topic_start = None
+        for index, message in enumerate(relevant_history):
+            if message.role == "user" and not self._is_follow_up(normalize_language(message.content).query):
+                if (DOMAIN.search(normalize_language(message.content).query)
+                        and not self.injection_detector.is_injection(message.content)):
+                    topic_start = index
+                else:
+                    topic_start = None
+        if topic_start is None:
+            return current, False
+        relevant_history = relevant_history[topic_start:]
+
+        # Do not guess between independent location options or borrow a refused topic.
+        topic = normalize_language(relevant_history[0].content).query
+        if (re.search(r"\b(?:apn|parcel)\b", topic, re.I)
+                and re.search(r"\bbuilding address\b", topic, re.I)):
+            return current, False
+        from app.guardrails.service import OFF_TOPIC_RESPONSE, PROMPT_INJECTION_RESPONSE
+        from app.intent.query_understanding import CLARIFICATION_RESPONSE
+        from app.rag.rag_service import INSUFFICIENT_KNOWLEDGE_RESPONSE
+        if relevant_history[-1].role == "assistant" and relevant_history[-1].content in {
+            OFF_TOPIC_RESPONSE, PROMPT_INJECTION_RESPONSE, CLARIFICATION_RESPONSE,
+            INSUFFICIENT_KNOWLEDGE_RESPONSE,
+        }:
+            return current, False
+
         history_text = self._format_history(
             relevant_history
         )
@@ -163,7 +196,7 @@ class ConversationContextBuilder:
         self,
         message: str,
     ) -> bool:
-        return any(
+        return bool(FOLLOW_UP.fullmatch(message)) or any(
             pattern.search(message)
             is not None
             for pattern in FOLLOW_UP_PATTERNS
@@ -178,7 +211,7 @@ class ConversationContextBuilder:
         lines = [
             (
                 f"{message.role.upper()}: "
-                f"{message.content}"
+                f"{normalize_language(message.content).query if message.role == 'user' else message.content}"
             )
             for message in history
         ]

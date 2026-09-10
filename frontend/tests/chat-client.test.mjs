@@ -20,7 +20,7 @@ test('creates once and reuses the ID for follow-ups; sends only the message fiel
   assert.equal(calls[0].options.body, undefined);
   assert.equal(calls[1].url, `/api/v1/chat/conversations/${id}/messages`);
   assert.equal(calls[2].url, calls[1].url);
-  assert.deepEqual(JSON.parse(calls[1].options.body), { message: 'Where?' });
+  assert.deepEqual(JSON.parse(calls[1].options.body), { message: '  Where?  ' });
   assert.equal(calls[1].options.credentials, 'omit');
 });
 

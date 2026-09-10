@@ -19,7 +19,8 @@ def run_regressions(root: Path) -> list[RegressionResult]:
         commands = {
             "python": [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
                        f"--basetemp={work / 'tmp'}", f"--junitxml={work / 'pytest.xml'}"],
-            "node": ["node", "--test", "--test-reporter=tap", "frontend/tests/chat-client.test.mjs"],
+            "node": ["node", "--test", "--test-reporter=tap",
+                     *[str(p.relative_to(root)) for p in sorted((root / "frontend/tests").glob("*.test.mjs"))]],
         }
         for name, command in commands.items():
             try:

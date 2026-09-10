@@ -145,7 +145,7 @@ class ConversationService:
         await self.repository.add_message(
             conversation_id=conversation_id,
             role="user",
-            content=message.strip(),
+            content=message,
             request_id=request_id,
         )
 

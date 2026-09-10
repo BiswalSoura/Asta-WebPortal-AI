@@ -14,7 +14,7 @@ export function validateMessage(value) {
   if (typeof value !== 'string' || !value.trim()) {
     throw new ChatError('Enter a question first.');
   }
-  const message = value.trim();
+  const message = value;
   if (Array.from(message).length > 4000) {
     throw new ChatError('Please keep your question to 4,000 characters or fewer.');
   }
