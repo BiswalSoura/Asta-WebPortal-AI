@@ -18,6 +18,7 @@ from app.conversation import (
 )
 from app.schemas.chat import (
     ChatMessageRequest,
+    ConversationCreateRequest,
     ChatMessageResponse,
     ChatSourceResponse,
     ConversationCreatedResponse,
@@ -41,6 +42,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_conversation(
+    request: ConversationCreateRequest | None = None,
     session: AsyncSession = Depends(
         get_database_session
     ),
@@ -49,7 +51,10 @@ async def create_conversation(
     ),
 ) -> ConversationCreatedResponse:
     conversation_id = (
-        await service.start_conversation()
+        await service.start_conversation(**(
+            {"page_context": {"host_page_context": request.page_context}}
+            if request is not None and request.page_context is not None else {}
+        ))
     )
 
     await session.commit()

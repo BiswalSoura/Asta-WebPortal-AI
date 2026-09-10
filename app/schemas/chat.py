@@ -56,3 +56,11 @@ class ChatMessageResponse(
     ] = Field(
         default_factory=list
     )
+
+class ConversationCreateRequest(BaseModel):
+    # Browser metadata only. Never identity, permissions, or prompt context.
+    model_config = {"extra": "forbid"}
+    page_context: str | None = Field(
+        default=None, min_length=1, max_length=128,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+    )

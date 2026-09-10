@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asta host integration fixture</title><link rel="stylesheet" href="/m11/css/host.css">
+<script type="module" src="/m11/js/host-demo.mjs"></script></head>
+<body><header><strong>Engineering workspace simulation</strong><button id="logout">Simulate logout / account switch</button></header>
+<nav aria-label="Simulated host navigation"><a href="?page=fixture-a">Reload to context A</a><a href="?page=fixture-b">Reload to context B</a><button id="spa">Switch context without reload</button></nav>
+<main><p>LOCAL INTEGRATION FIXTURE · M14</p><h1 id="page-title"></h1>
+<p>This generic host layout is a simulation. It does not represent real WebPortal routes or authentication.</p>
+<p>Ask “Where can I enter parcel information for the project location?”, navigate to the other context, then ask “Can you explain that option?”</p>
+<p>Only the conversation identifier survives reload. Earlier messages remain on the server and are not restored into this view.</p>
+<dl><dt>Page context</dt><dd id="context"></dd><dt>Conversation identifier</dt><dd id="conversation">None</dd></dl>
+<p id="storage-check"></p><button id="expired">Simulate unknown conversation (reload)</button>
+<div id="assistant-container"></div></main></body></html>
