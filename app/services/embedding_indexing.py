@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -43,11 +45,14 @@ class EmbeddingIndexingService:
 
     async def index_batch(
         self,
+        *,
+        version_id: UUID | None = None,
     ) -> EmbeddingIndexResult:
         chunks = (
             await self.repository
             .get_pending_chunks(
-                limit=self.batch_size
+                limit=self.batch_size,
+                **({"version_id": version_id} if version_id is not None else {}),
             )
         )
 

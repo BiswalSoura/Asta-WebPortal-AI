@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +21,7 @@ class EmbeddingRepository:
         self,
         *,
         limit: int,
+        version_id: UUID | None = None,
     ) -> list[KnowledgeChunk]:
         result = await self.session.execute(
             select(KnowledgeChunk)
@@ -34,6 +37,7 @@ class EmbeddingRepository:
             )
             .where(
                 DocumentVersion.is_active.is_(True),
+                *([DocumentVersion.id == version_id] if version_id is not None else []),
                 ChunkEmbedding.id.is_(None),
             )
             .order_by(
