@@ -35,7 +35,7 @@ class ChatMessageRequest(
                 "Message cannot be empty."
             )
 
-        return normalized
+        return value
 
 
 class ChatSourceResponse(

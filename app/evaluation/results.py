@@ -87,6 +87,7 @@ class Report(StrictModel):
     results: list[CaseResult] = Field(default_factory=list)
     retrieval_metrics: dict[str, float | int] = Field(default_factory=dict)
     category_summary: dict[str, dict[str, int]] = Field(default_factory=dict)
+    robustness_metrics: dict[str, dict[str, float | int]] = Field(default_factory=dict)
     gates: dict[str, bool] = Field(default_factory=dict)
     elapsed_seconds: float = 0.0
     status: Literal["PASS", "FAIL"] = "FAIL"

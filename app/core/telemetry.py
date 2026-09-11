@@ -51,6 +51,7 @@ def safe_fields(fields):
     result = {}
     enums = {'error_code': ERROR_CODES, 'stage': {'conversation', 'rag', 'retrieval', 'llm'},
              'path': {'guardrail_bypass', 'rag'},
+             'query_understanding': {'unchanged', 'normalized', 'clarification'},
              'outcome': {'bypass', 'grounded', 'insufficient_information'},
              'method': {'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD', 'TRACE', 'CONNECT'}}
     for key, value in fields.items():

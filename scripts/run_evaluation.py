@@ -134,6 +134,8 @@ def main(argv=None) -> int:
     for category, summary in report.category_summary.items():
         print(f"{category}: {summary['passed']}/{summary['total']} passed")
     metrics = report.retrieval_metrics
+    for group, values in report.robustness_metrics.items():
+        print(f"{group}: {values['passed']}/{values['total']} passed")
     print(f"Top-1={metrics['top1_accuracy']:.3f} Recall@K={metrics['recall_at_k']:.3f} "
           f"MRR={metrics['mrr']:.3f}")
     print(f"Overall {report.status}; JSON report written. Run ID: {run_id}")

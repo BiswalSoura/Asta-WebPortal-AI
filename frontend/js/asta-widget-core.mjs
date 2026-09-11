@@ -2,6 +2,20 @@ import { AstaClient, validateMessage } from './asta-client.mjs';
 
 const mounts = new WeakMap();
 
+// Only paired **bold** is interpreted. Every other character remains literal text.
+export function formatAnswer(body, text) {
+  const parts = text.split(/(\*\*[^*\n]+\*\*)/g);
+  if (parts.length === 1) { body.textContent = text; return; }
+  body.replaceChildren();
+  for (const part of parts) {
+    if (!part) continue;
+    const bold = part.startsWith('**') && part.endsWith('**');
+    const node = body.ownerDocument.createElement(bold ? 'strong' : 'span');
+    node.textContent = bold ? part.slice(2, -2) : part;
+    body.append(node);
+  }
+}
+
 export function mountWidget(host, options = {}) {
   if (!host || typeof host.attachShadow !== 'function') throw new TypeError('A host element is required.');
   if (mounts.has(host)) return mounts.get(host);
@@ -56,7 +70,8 @@ export function mountWidget(host, options = {}) {
     const name = document.createElement('strong');
     name.textContent = role === 'user' ? 'You' : 'Asta';
     const body = document.createElement('p');
-    body.textContent = text;
+    if (role === 'assistant') formatAnswer(body, text);
+    else body.textContent = text;
     article.append(name, body);
     if (sources.length) {
       const details = document.createElement('details');

@@ -103,6 +103,18 @@ def classify_error(exc: Exception) -> str:
 
 
 def finalize_report(report: Report, suite: CaseSuite | None) -> Report:
+    groups = {}
+    observed = {r.id: r for result in report.results for r in [result, *result.steps]}
+    if suite:
+        for case in suite.cases:
+            for entry in (case.steps if isinstance(case, ConversationCase) else [case]):
+                group = getattr(entry, "robustness_group", None)
+                if group:
+                    groups.setdefault(group, []).append(bool(entry.id in observed and observed[entry.id].passed))
+    report.robustness_metrics = {
+        group: {"total": len(values), "passed": sum(values), "pass_rate": sum(values) / len(values)}
+        for group, values in groups.items()
+    }
     report.category_summary = {
         category: {
             "total": sum(r.category == category for r in report.results),

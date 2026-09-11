@@ -10,6 +10,9 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_vali
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 Identifier = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_-]*$")]
 Category = Literal["retrieval", "supported_answer", "unsupported", "guardrail", "conversation"]
+RobustnessGroup = Literal["clean_supported", "paraphrase", "casual_filler", "typo_grammar",
+                          "contextual_followup", "ambiguous_clarification",
+                          "gibberish_clarification", "obfuscated_injection", "understood_unsupported"]
 
 
 class StrictModel(BaseModel):
@@ -17,6 +20,7 @@ class StrictModel(BaseModel):
 
 
 class Expectations(StrictModel):
+    robustness_group: RobustnessGroup | None = None
     expected_section: Text | None = None
     expected_topic: Text | None = None
     required_terms: list[Text] = Field(default_factory=list)
