@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import AliasChoices, Field, field_validator
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 from urllib.parse import urlsplit
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,6 +11,11 @@ from app.core.constants import (
 
 
 class Settings(BaseSettings):
+    knowledge_admin_api_enabled: bool = Field(
+        default=False, validation_alias="KNOWLEDGE_ADMIN_API_ENABLED")
+    knowledge_admin_token: SecretStr | None = Field(
+        default=None, validation_alias="KNOWLEDGE_ADMIN_TOKEN")
+
     cors_allowed_origins: list[str] = Field(default_factory=list)
     cors_expose_request_id: bool = False
 

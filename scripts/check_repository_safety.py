@@ -9,8 +9,12 @@ KEY_PATTERN = re.compile(r'\b(?:gsk_|hf_|sk-)[A-Za-z0-9_-]{20,}')
 PRIVATE_KEY = re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----')
 
 
+ADMIN_ASSIGNMENT = re.compile(
+    r'''(?im)(?:[\"']?(?:ASTA_)?KNOWLEDGE_ADMIN_TOKEN[\"']?)\s*[:=]\s*[\"']?([A-Za-z0-9_./+\-=]{20,})''')
+
+
 def unsafe_content(text):
-    return bool(KEY_PATTERN.search(text) or PRIVATE_KEY.search(text))
+    return bool(KEY_PATTERN.search(text) or PRIVATE_KEY.search(text) or ADMIN_ASSIGNMENT.search(text))
 
 
 def main():

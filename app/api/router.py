@@ -13,3 +13,9 @@ api_router.include_router(ready_router)
 api_router.include_router(
     chat.router
 )
+
+from app.api.routes.knowledge import router as knowledge_router
+from app.api.routes.feedback import router as feedback_router
+
+api_router.include_router(knowledge_router)
+api_router.include_router(feedback_router)
